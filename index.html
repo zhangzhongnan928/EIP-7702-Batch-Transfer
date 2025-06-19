@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERC20 Batch Transfer | MetaMask Smart Account</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .button-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .button-secondary {
+            background: #f7fafc;
+            color: #2d3748;
+            border: 2px solid #e2e8f0;
+        }
+
+        .button-secondary:hover:not(:disabled) {
+            background: #edf2f7;
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .status.info {
+            background: #bee3f8;
+            color: #2a4365;
+            border: 1px solid #90cdf4;
+        }
+
+        .status.warning {
+            background: #faf0b2;
+            color: #744210;
+            border: 1px solid #f6e05e;
+        }
+
+        .tokens-list {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .tokens-list h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .token-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .token-item:last-child {
+            border-bottom: none;
+        }
+
+        .token-info {
+            flex: 1;
+        }
+
+        .token-symbol {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .token-balance {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .wallet-info {
+            background: #edf2f7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .wallet-info .label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .wallet-info .address {
+            font-family: monospace;
+            font-size: 14px;
+            color: #2d3748;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 ERC20 Batch Transfer</h1>
+            <p>Transfer all your ERC20 tokens in one atomic transaction</p>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="walletInfo" class="wallet-info">
+            <div class="label">Connected Wallet</div>
+            <div id="walletAddress" class="address"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="recipientAddress">Recipient Address</label>
+            <input 
+                type="text" 
+                id="recipientAddress" 
+                placeholder="0x..." 
+                pattern="^0x[a-fA-F0-9]{40}$"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="customTokenAddress">Add Custom Token Address (Optional)</label>
+            <input 
+                type="text" 
+                id="customTokenAddress" 
+                placeholder="0x... (Enter ERC20 token contract address)"
+                pattern="^0x[a-fA-F0-9]{40}$"
+            >
+            <button id="addTokenBtn" class="button button-secondary" style="margin-top: 10px;">
+                Add Token
+            </button>
+        </div>
+
+        <button id="connectBtn" class="button button-primary">
+            Connect MetaMask
+        </button>
+
+        <button id="scanTokensBtn" class="button button-secondary" disabled>
+            <span class="button-text">Scan ERC20 Tokens</span>
+            <span class="loading-spinner" style="display: none;"><span class="loading"></span></span>
+        </button>
+
+        <div id="tokensList" class="tokens-list">
+            <h3>Detected ERC20 Tokens</h3>
+            <div id="tokensContainer"></div>
+        </div>
+
+        <button id="testSingleTransferBtn" class="button button-secondary" disabled>
+            <span class="button-text">✅ Test Single Token Transfer</span>
+            <span class="loading-spinner" style="display: none;"><span class="loading"></span></span>
+        </button>
+
+        <button id="checkBatchSupportBtn" class="button button-secondary" disabled>
+            <span class="button-text">🔍 Check Batch Support Details</span>
+            <span class="loading-spinner" style="display: none;"><span class="loading"></span></span>
+        </button>
+
+        <button id="executeTraditionalBtn" class="button button-primary" disabled>
+            <span class="button-text">🔄 Execute Traditional Transfers</span>
+            <span class="loading-spinner" style="display: none;"><span class="loading"></span></span>
+        </button>
+
+        <button id="batchTransferBtn" class="button button-primary" disabled>
+            <span class="button-text">⚡ Execute Batch Transfer (EIP-5792)</span>
+            <span class="loading-spinner" style="display: none;"><span class="loading"></span></span>
+        </button>
+
+        <div id="transactionStatus" class="status" style="display: none;">
+            <div id="txStatusText"></div>
+            <div id="txHash" style="margin-top: 10px; font-family: monospace; font-size: 12px; word-break: break-all;"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 

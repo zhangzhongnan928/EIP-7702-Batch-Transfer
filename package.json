@@ -1,0 +1,25 @@
+{
+  "name": "erc20-batch-transfer-dapp",
+  "version": "1.0.0",
+  "description": "MetaMask Smart Account ERC20 batch transfer dapp",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "npx live-server --port=8000 --open=/",
+    "serve": "npx serve -s . -l 8000"
+  },
+  "keywords": [
+    "ethereum",
+    "erc20",
+    "metamask",
+    "batch-transfer",
+    "eip-5792",
+    "smart-account"
+  ],
+  "author": "Developer",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "serve": "^14.2.1"
+  }
+} 
